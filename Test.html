@@ -1,0 +1,55 @@
+<!doctype html>
+<html ng-app="app" ng-controller="ctrl">
+
+<head>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    tr.selected td {
+      background: #ccc!important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <table class="table table-bordered">
+      <tr ng-repeat="user in users" ng-class="{'selected': user.selected}" ng-click="select(user)">
+        <td ng-bind="user.name"></td>
+      </tr>
+    </table>
+
+    <button ng-click="getAllSelectedRows()">getAllSelectedRows</button>
+	<p>{{x}}</p>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-rc.0/angular.js"></script>
+  <script>
+  angular.module("app", []);
+     angular.module("app").controller("ctrl", function($scope, $filter) {
+       $scope.users = [{
+         name: "x"
+       }, {
+         name: "y"
+       }, {
+         name: "z"
+       }];
+
+       $scope.select = function(item) {
+         item.selected ? item.selected = false : item.selected = true;
+       }
+
+       $scope.getAllSelectedRows = function() {
+         var x = $filter("filter")($scope.users, {
+           selected: true
+         }, true);
+         console.log(x);
+		 alert(console.log(x));
+       }
+
+     });
+	 </script>
+</body>
+
+</html>

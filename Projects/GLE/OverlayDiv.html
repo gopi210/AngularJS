@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+<style>
+.overlay
+ {
+     position: absolute;
+     top: 0;
+     left: 0;
+     right: 0;
+     bottom: 0;
+     background-color: rgba(0, 0, 0, 0.85);
+     z-index: 9999;
+     color: white;
+     display: inline-block;
+ }
+ </style>
+
+<div class="panel panel-primary" style="box-shadow: 5px 5px 2px #888888;">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Vehicle Status Comparison <span class="pull-right"><i class="glyphicon glyphicon-fullscreen"
+                                        data-toggle="tooltip" data-placement="left" title="Show Full Screen"></i>&nbsp;
+                                        <i class="glyphicon glyphicon-pushpin" data-toggle="tooltip" data-placement="left"
+                                            title="Show options"></i>&nbsp; <i class="glyphicon glyphicon-info-sign" data-container="body"
+                                                data-toggle="popover" data-placement="bottom" title="Information" data-content="This is a very useful information. But I do not know what to write here.">
+                                            </i>&nbsp; <i class=" glyphicon glyphicon-retweet" data-toggle="tooltip" data-placement="left"
+                                                title="Toggle Chart"></i>&nbsp; </span>
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="c_VehicleStatusFull">
+                                </div>
+                                <div class="overlay" style="display: none">
+                                </div>
+                            </div>
+</div>
+<script>
+$('.glyphicon-pushpin').click(function () {
+     $('.overlay').toggle();
+});
+</script>
+</body>
+</html>

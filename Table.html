@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<style>
+table, td, th  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="elasticsearch.angular.js"></script>
+<body ng-app="EsConnector" ng-controller="QueryController">
+<div>
+<form>
+  Query: <input type="text" ng-model="query" size="100">
+  <br>
+  <br>
+  <button type="submit" ng-click="myFunc()">Search</button>
+  <button type="submit" ng-click="SendToReplay()">Replay</button>
+</form>
+<br>
+<br>
+<table ng-show="hits.length > 0">
+  <th><input type="checkbox" ng-model="selectedAll" ng-click="checkAll()"></th>
+  <th>APPID</th>
+  <th>InterfaceName</th>
+  <th>ExceptionMessage</th>
+  <th>StackTrace</th>
+  <th>ExceptionCode</th>
+  </tr>
+  <tr ng-repeat="x in hits">
+    <td>
+    <input type="checkbox" ng-model="x.selected" ng-class="{'selected': x.selected}" ng-click="select(x)"/>
+    </td>
+    <td ng-if="$odd" style="background-color:#f1f1f1">
+    {{ x._source.Header.ApplicationID }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.ApplicationID }}</td>
+    <td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.ComponentName }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.ComponentName }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.Message }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.Message }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.StackTrace }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.StackTrace }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.ExceptionCode }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.ExceptionCode }}</td>
+  </tr>
+</table>
+</div>
+<script>
+// We define an EsConnector module that depends on the elasticsearch module.     
+var EsConnector = angular.module('EsConnector', ['elasticsearch']);
+
+// Create the es service from the esFactory
+EsConnector.service('es', function (esFactory) {
+  return esFactory({ host: 'localhost:9200' });
+});
+
+// We define an Angular controller that returns the server health
+// Inputs: $scope and the 'es' service
+
+EsConnector.controller('ServerHealthController', function($scope, es) {
+
+    es.cluster.health(function (err, resp) {
+        if (err) {
+            $scope.data = err.message;
+        } else {
+            $scope.data = resp;
+        }
+    });
+});
+
+// We define an Angular controller that returns query results,
+// Inputs: $scope and the 'es' service
+EsConnector.controller('QueryController', function($scope, $filter, es) {
+
+// search for documents
+$scope.myFunc = function () {
+    var k = "Header.ApplicationID:APG1";
+    es.search({
+    index: 'cle',
+    size: 50,
+    body: {
+    "query":
+        {
+            "match": {
+                "Header.ApplicationID":"APG"
+            }   
+        },
+    }
+       
+    }).then(function (response) {
+      $scope.hits = response.hits.hits;
+    });
+}
+ $scope.checkAll = function () {
+        if ($scope.selectedAll) {
+            $scope.selectedAll = true;
+        } else {
+            $scope.selectedAll = false;
+        }
+        angular.forEach($scope.hits, function (item) {
+		    item.selected = $scope.selectedAll;
+            //alert(item.selected);			
+        });
+};
+ $scope.select = function(item) {
+         alert("you selected me");
+         item.selected ? item.selected = true : item.selected = false;
+		 alert(item.selected);
+       };	   
+	$scope.SendToReplay = function () {
+	   alert("you there");
+	   var x = $filter("filter")($scope.hits, {
+           selected: true
+         }, true);
+		 alert(x.length);
+    }
+
+});
+</script>
+</body>
+</html>

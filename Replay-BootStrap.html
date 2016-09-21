@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="elasticsearch.angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.treegrid.js"></script>
+<link rel="stylesheet" href="css/jquery.treegrid.css">
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.tree').treegrid();
+    });
+</script>
+<style>
+#rcorners2 {
+    border-radius: 25px;
+	border: 2px solid #73AD21;
+    padding: 20px; 
+    width: 225px;
+	height: 1px;
+}
+</style>
+</head>	
+<body ng-app="EsConnector" ng-controller="QueryController">
+<nav class="navbar navbar-default" role="navigation">
+<div class="container-fluid">
+<div class="navbar-header">
+<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+ </button>
+<a class="navbar-brand" href="#"><img style="max-width:48px; margin-top: -15px;max-height:48px;" src="NAPA_Logo_big.jpg"></a> 
+<a class="navbar-brand" href="#">ESB Portal</a>
+</div>
+<div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+              <li><a href="#" ng-click="showDiv('Replay')">Reports</a><li>
+              <li><a href="#" ng-click="showDiv('EMS')">EMS Monitor</a></li>
+              <li><a href="#" ng-click="showDiv('Search')">Search</a></li>              
+            </ul>
+</div>
+</div>
+</nav>
+<div class="container-fluid" ng-show='hideEMSform'>
+<font size="2">Query: </font><input type="text" ng-model="QueueName" size="25" align="left">
+<button type="submit" ng-click="showData()">Go</button>
+<div>
+<table ng-show="people.length > 0">
+        <thead style="background-color: lightgray;">
+          <tr>
+            <td style="width: 100px;">Interface</td>
+			<td style="width: 100px;">Component</td>
+            <td style="width: 100px;">Success</td>
+			<td style="width: 100px;">Fail</td>
+          </tr>  
+        </thead>
+        <tbody>
+          <tr ng-repeat-start="person in people">
+		    <td>{{person.name}}</td>
+			<td>{{person.gender}}</td>
+            <td>
+             <a id="SuccessCount" href ng-click="person.expanded = !person.expanded;myFunc()">4</a>              
+            </td>
+            <td>
+             <a id="FailCount" href ng-click="person.expanded1 = !person.expanded1">4</a>              
+            </td>			
+            </tr>
+          <tr ng-if="person.expanded" ng-repeat-end="">
+            <td colspan="4"><table class="table">
+			<thead style="background-color: lightgray;">
+			<tr>            
+             <th>InterfaceName</th>
+              <th>TransactionID</th>
+              <th>ExceptionMessage</th>
+               <th>ExceptionCode</th>
+                <th>TimeStamp</th>
+                <th>TransactionData</th>
+				</tr>
+				</thead>
+				<tr ng-repeat="x in hits">
+				<td>{{x._source.Header.InterfaceID}}</td>
+				<td>{{x._source.Header.TransactionID}}</td>
+				<td>{{x._source.Header.ExceptionMessage}}</td>
+				<td>{{x._source.Header.ExceptionCode}}</td>
+				<td>{{x._source.Header.TimeStamp}}</td>
+				<td>{{x._source.Header.TransactionData}}</td>
+				</tr>
+				</table></td>		
+  
+          </tr>
+        </tbody>
+      </table>
+</div>
+</div>
+<div class="container-fluid" ng-show='hideSearchform'>
+<font size="2">Query: </font><input type="text" ng-model="QueueName" size="25" align="left">
+<button type="submit" ng-click="showData()">Go</button>
+<table class="tree">
+	<tr class="treegrid-1">
+		<td>Root node</td><td>Additional info</td>
+	</tr>
+	<tr class="treegrid-2 treegrid-parent-1">
+		<td>Node 1-1</td><td>Additional info</td>
+	</tr>
+	<tr class="treegrid-3 treegrid-parent-1">
+		<td>Node 1-2</td><td>Additional info</td>
+	</tr>
+	<tr class="treegrid-4 treegrid-parent-3">
+		<td>Node 1-2-1</td><td>Additional info</td>
+	</tr>
+</table>
+</div>
+<div class="container-fluid" ng-show='hideQueryform'>
+<form>
+ <font size="2">Query: </font><input type="text" ng-model="QueryString" size="25" align="left">
+  <button type="submit" ng-click="myFunc()">Go</button>
+</form>
+<div class="container-fluid" ng-show="hits.length > 0">
+<table class="table">
+  <thead>
+  <tr>
+  <th><input type="checkbox" ng-model="selectedAll" ng-click="checkAll()"></th>
+  <th>InterfaceName</th>
+  <th>TransactionID</th>
+  <th>ExceptionMessage</th>
+  <th>ExceptionCode</th>
+  <th>TimeStamp</th>
+  <th>TransactionData</th>
+  <th>StackTrace</th>
+  </tr>
+  <tr ng-repeat="x in hits">
+    <td>
+    <input type="checkbox" ng-model="x.selected" ng-class="{'selected': x.selected}" ng-click="select(x)"/>
+    </td>
+    <td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.InterfaceID }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.InterfaceID }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.TransactionID }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.TransactionID }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.Message }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.Message }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.ExceptionCode }}</td>
+    <td ng-if="$even">
+    {{  x._source.ExceptionCode }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.Timestamp }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.Timestamp }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.Transaction }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.Transaction }}</td>
+	<td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.StackTrace }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.StackTrace }}</td>
+  </tr>
+</table>
+</div>
+</div>
+<script>
+// We define an EsConnector module that depends on the elasticsearch module.     
+var EsConnector = angular.module('EsConnector', ['elasticsearch']);
+
+// Create the es service from the esFactory
+EsConnector.service('es', function (esFactory) {
+  return esFactory({ host: 'localhost:9200' });
+});
+
+// We define an Angular controller that returns the server health
+// Inputs: $scope and the 'es' service
+
+EsConnector.controller('ServerHealthController', function($scope, es) {
+
+    es.cluster.health(function (err, resp) {
+        if (err) {
+            $scope.data = err.message;
+        } else {
+            $scope.data = resp;
+        }
+    });
+});
+
+// We define an Angular controller that returns query results,
+// Inputs: $scope and the 'es' service
+EsConnector.controller('QueryController', function($scope, $filter, es) {
+
+// search for documents
+$scope.myFunc = function () {
+    var k = "Header.ApplicationID:APG1";
+    es.search({
+    index: 'exceptions',
+    size: 50,
+    body: {
+    "query":
+        {
+           "bool": {
+      "must": [
+        { "match": {"Header.ApplicationID":"APG" }},
+        { "match": {"Header.InterfaceID":"Lucity_POS"}}
+      ]
+	  
+    }
+	
+        },
+    }
+       
+    }).then(function (response) {
+      $scope.hits = response.hits.hits;
+    });
+}
+ $scope.checkAll = function () {
+        if ($scope.selectedAll) {
+            $scope.selectedAll = true;
+        } else {
+            $scope.selectedAll = false;
+        }
+        angular.forEach($scope.hits, function (item) {
+		    item.selected = $scope.selectedAll;
+            //alert(item.selected);			
+        });
+};
+$scope.hideIt = function(){
+     $scope.hideme = false;
+     }
+ $scope.select = function(item) {
+         item.selected ? item.selected = true : item.selected = false;
+       };	   
+	$scope.showDiv = function (DivName) {
+	  if(DivName == 'Replay'){
+	  $scope.hideQueryform=true;
+	  $scope.hideEMSform=false;
+	  $scope.hideSearchform=false;
+	  }
+	  else if(DivName == 'Search'){
+	  $scope.hideQueryform=false;
+	  $scope.hideEMSform=false;
+	  $scope.hideSearchform=true;
+	  }
+	  else{
+	  $scope.hideQueryform=false;
+	  $scope.hideEMSform=true;
+	  $scope.hideSearchform=false;
+	  }
+    }
+    $scope.SendToReplay = function () {
+	   alert("Selected Transaction(s) ready to be Replayed");
+	   var x = $filter("filter")($scope.hits, {
+           selected: true
+         }, true);
+    }	
+	$scope.showData = function() {
+  $scope.people = [
+    {name: "Bob", gender: "Male", details: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque quis nisi quis mi tincidunt luctus ut quis nunc. Nam non risus tincidunt risus sodales condimentum. Morbi sed gravida elit. Nunc a turpis vestibulum elit posuere blandit. Phasellus luctus lectus non porta auctor. Etiam pellentesque imperdiet posuere. Nullam adipiscing congue nisl, in vulputate odio ornare ac."},
+    {name: "Jane", gender: "Female", details: "Maecenas quis sodales lectus, vitae convallis ipsum. Ut ac viverra tellus. Quisque vulputate, orci placerat eleifend scelerisque, eros nunc rutrum odio, pharetra mattis leo neque vel eros. Cras id purus nec lorem vehicula rutrum a vel arcu. Quisque eget euismod augue. Integer volutpat auctor lorem, quis lacinia nisl tempus nec. Nunc fringilla, odio eget molestie varius, tortor turpis dignissim lacus, sed varius nunc velit eu turpis. Etiam sed congue diam. In ornare elit nec dolor faucibus ornare. Ut eget erat vel elit tristique iaculis. Maecenas et semper lorem. Nam mollis ante et ipsum vestibulum posuere. Ut non purus non risus tempor vulputate et vitae ipsum. Mauris et sem sit amet quam pulvinar fringilla."},
+    {name: "Bill", gender: "Male", details: "Quisque rhoncus scelerisque sapien, tempor vestibulum dui tincidunt eu. Maecenas scelerisque, dolor sed vehicula pulvinar, ligula erat ornare arcu, in dictum ipsum libero vel est. Donec porttitor venenatis lacus, a laoreet orci. Proin quam mi, ultrices in ullamcorper vel, malesuada suscipit lectus. Nam faucibus commodo quam, auctor vehicula felis condimentum quis. Phasellus tempor molestie enim, at vehicula justo auctor eu. Pellentesque venenatis elit eu malesuada fringilla."}
+  ];
+}
+});
+</script>
+</body>
+</html>

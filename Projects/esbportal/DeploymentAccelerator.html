@@ -1,0 +1,42 @@
+<div class="container-fluid">
+ <div class="panel-group">
+  <div class="panel panel-primary">
+    <div class="panel-heading">TIBCO App Deployment Form</div>
+        <div class="panel-body">    
+          <form class="form-inline" role="form">
+             <div class="form-group">
+                <label for="Archive">ArchivePath</label>
+                   <input type="text" class="form-control" id="Archive" placeholder="Enter ArchivePath" ng-model="archivepath" ng-blur="GenArtifacts(archivepath)">
+                   <label for="Archive">Domain</label>
+                <select class="selectpicker">
+                    <option>APG_QA_01</option>
+                    <option>GPC_QA_01</option>
+                    <option>APG_QA_02</option>
+                    <option>GPC_QA_02</option>
+                </select>
+              </div>
+              <div class="alert alert-danger" ng-show="!archivepath">
+                ArchivePath is mandatory!
+              </div>
+           </form>
+     </div>
+  </div>  
+ <div class="container">
+ <ul class="nav nav-tabs">
+ <li ng-repeat="ArchiveVariable in ArchiveVariables"><a data-toggle="tab" href="#{{ ArchiveVariable.Name }}">{{ ArchiveVariable.Name }}</a></li>
+ </ul> 
+  <div id="my-tab-content" class="tab-content">
+        <div ng-repeat="GvsContent in ArchiveVariables" class="tab-pane fade" ng-class="{'active':$index == '1'}" id="{{ GvsContent.Name }}">
+            <div class="editable" contenteditable="true">            
+                <pre>{{ GvsContent.GVs }}</pre>
+             </div>
+        </div>
+    </div>
+    <div ng-show="loading">
+    <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+    <span class="sr-only">Loading...</span>
+    </div>    
+  </div>
+</div>
+</div>
+ 

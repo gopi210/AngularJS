@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<style>
+table, td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body>
+
+<div ng-app="myApp" ng-controller="customersCtrl"> 
+
+<table class='table table-striped'>
+    <tr>
+        <th><input type="checkbox" ng-click="selectAllFilteredItems()"></th>
+    </tr>
+    <tr ng-repeat="item in items | filter:searchText">
+        <td><input type="checkbox" ng-model="item.selected"></td>
+    </tr>
+</table>
+
+</div>
+
+<script>
+app.controller('MyCtrl', function($scope, $filter){ 
+   var filter = $filter('filter');
+
+   $scope.items = [/* your items here */]
+
+   $scope.selectAllFilteredItems = function (){
+      var filtered = filter($scope.items, $scope.search_text);
+
+      angular.forEach(filtered, function(item) {
+         item.selected = true;
+      });
+   };
+});
+</script>
+
+</body>
+</html>

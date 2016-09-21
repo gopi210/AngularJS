@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<style>
+table, td, th  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body ng-app="myApp" ng-controller="myCtrl">
+<div>
+<form>
+  Query: <input type="text" ng-model="query" size="100">
+  <br>
+  <br>
+  <button type="submit" ng-click="myFunc()">Search</button>
+  <button type="submit" ng-click="SendToReplay()">Replay</button>
+</form>
+<br>
+<br>
+<table ng-show="myTxt.length > 0">
+  <th><input type="checkbox" ng-model="selectedAll" ng-click="checkAll()"></th>
+  <th>APPID</th>
+  <th>InterfaceName</th>
+  </tr>
+  <tr ng-repeat="x in myTxt">
+    <td>
+    <input type="checkbox" ng-model="x.selected" ng-class="{'selected': x.selected}" ng-click="select(x)"/>
+    </td>
+    <td ng-if="$odd" style="background-color:#f1f1f1">
+    {{ x._source.Header.ApplicationID }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.ApplicationID }}</td>
+    <td ng-if="$odd" style="background-color:#f1f1f1">
+    {{  x._source.Header.ComponentName }}</td>
+    <td ng-if="$even">
+    {{  x._source.Header.ComponentName }}</td>
+  </tr>
+</table>
+</div>
+<script>
+var app = angular.module("myApp", []);
+app.controller("myCtrl", function($scope, $http, $filter) { 
+  $scope.myFunc = function () {
+$http({
+    url: 'http://localhost:9200/cle/logs/_search',
+	method: "POST",
+	params: {"query": "Header.ApplicationID:APG1"},
+	headers: {'Content-Type': 'application/json;charset=utf-8'}
+	}).then(function (response) {
+	$scope.myTxt = response.data.hits.hits;
+	}).error(function(data, status, headers, config) {
+					alert("Error");
+	    });
+}
+
+  $scope.checkAll = function () {
+        if ($scope.selectedAll) {
+            $scope.selectedAll = true;
+        } else {
+            $scope.selectedAll = false;
+        }
+        angular.forEach($scope.myTxt, function (item) {
+		    item.selected = $scope.selectedAll;
+            alert(item.selected);			
+        });
+};
+ $scope.select = function(item) {
+         alert("you selected me");
+         item.selected ? item.selected = true : item.selected = flase;
+		 alert(item.selected);
+       };	   
+	$scope.SendToReplay = function () {
+	   alert("you there");
+	   var x = $filter("filter")($scope.myTxt, {
+           selected: true
+         }, true);
+		 alert(x.length);
+    }
+	
+});
+</script>
+</body>
+</html>

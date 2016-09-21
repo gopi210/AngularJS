@@ -1,0 +1,29 @@
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body ng-app="myApp" ng-controller="myCtrl">
+<form>
+  <input ng-model="query"/>
+  <button type="submit" ng-click="sendPost()">Search</button>
+  <button type="submit" ng-click="SendToReplay()">Replay</button>
+</form>
+<script>
+var app = angular.module("myApp", []);
+app.controller("myCtrl", function($scope, $http, $filter) { 
+	   $scope.sendPost = function() {
+	   var k = $scope.query;
+	alert(k);
+	$http({
+    url: 'http://localhost:9867/cle/logs/_search',
+    method: "POST",
+    params: {"query": "Header.ApplicationID:APG"},
+    headers: {'Content-Type': 'application/json;charset=utf-8'}
+}).then(function (results) {
+    alert(results.data.hits.hits);
+}).error(function (data, status, headers, config) {
+    $scope.status = status + ' ' + headers;
+});
+    }
+})
+</script>
+</body>
+</html>
